@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Club de Clientes</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <div class="container init">
+
+    <div class="logo logo-intro">
+      <img src="LogoClub.png" alt="Club de Clientes" />
+    </div>
+    <h1 class="subtitle">Bienvenidos</h1>
+
+
+    <div class="contenido">
+      <input
+        type="tel"
+        id="telefono"
+        placeholder="Ingresá tu celular (ej: 1123456789)"
+      />
+
+      <button
+        type="button"
+        id="btnRegistrar"
+        onclick="registrar()"
+      >
+        Registrarse
+      </button>
+
+      <img src="chango.png" class="footer-image" />
+    </div>
+
+  </div>
+
+  <!-- MODAL REGISTRO / COMPRA -->
+<div class="modal" id="modalRegistro" data-registro="false">
+  <div class="modal-card">
+
+    <div class="modal-check">✓</div>
+      <h2 id="modalTitulo">Mensaje</h2>
+      <p id="modalMensaje" class="modal-mensaje"></p>
+
+    <div class="modal-box">
+      <p class="punto">⭐ Ganaste <b>1 punto</b></p>
+      <p class="total-label">Total de puntos</p>
+      <p class="total" id="totalPuntos">0</p>
+    </div>
+
+    <button
+      type="button"
+      class="btn-continuar"
+      id="btnModal"
+      onclick="accionModal()"
+    >
+      Continuar
+    </button>
+
+  </div>
+</div>
+
+<!-- MODAL PROMO (SEGUNDO MODAL) -->
+<div class="modal" id="modalPromo">
+  <div class="modal-card">
+
+    <h2>¿Querés recibir novedades?</h2>
+
+    <div class="modal-box">
+      <h4>Sumate a nuestro WhatsApp</h4> 
+      <p>Promociones exclusivas, sorteos y beneficios del club.</p>
+    </div>
+
+     
+    <div class="contenedor-btn">
+      <button class="btn-whatsapp" onclick="unirseWhatsapp()">
+        Unirme al WhatsApp
+    </button>
+    <button
+      type="button"
+      class="btn-continuar"
+      onclick="cerrarPromo()"
+    >
+      Cerrar
+    </button>
+
+    </div>
+
+  </div>
+</div>
+
+
+  </div>
+</div>
+ 
+ <script>
+let esRegistro = false;
+
+ function registrar() {
+  const telefono = document.getElementById("telefono").value.trim();
+
+  if (!telefono) {
+    abrirModal(
+      "error",
+      "Por favor ingresá tu número de celular",
+      "—"
+    );
+    return;
+  }
+
+  fetch("https://script.google.com/macros/s/AKfycbzQuV5RCrLQ3bD6dup0ljdPEzDyTKVid0BsVkaklc8gKNZKRBSunfBWRzk67yGxzEHm/exec?modo=registro&telefono=" + telefono)
+
+    .then(res => res.text())
+    .then(texto => {
+      const limpio = texto.replace("OK|", "").trim();
+      const mensaje = limpio.split("\n")[0];
+
+      const match = limpio.match(/Total de puntos:\s*(\d+)/);
+      const total = match ? match[1] : "0";
+
+      const esRegistro = mensaje.toLowerCase().includes("registr");
+
+      abrirModal(
+        esRegistro ? "registro" : "compra",
+        mensaje,
+        total
+      );
+    })
+    .catch(() => {
+      abrirModal(
+        "error",
+        "Error de conexión. Intentá nuevamente",
+        "—"
+      );
+    });
+}
+
+
+ function abrirModal(tipo, mensaje, total) {
+  const modal = document.getElementById("modalRegistro");
+  const titulo = document.getElementById("modalTitulo");
+  const mensajeTxt = document.getElementById("modalMensaje");
+  const puntos = document.getElementById("totalPuntos");
+  const btn = document.getElementById("btnModal");
+  const box = document.querySelector(".modal-box");
+  const check = document.querySelector(".modal-check");
+
+  if (!modal || !titulo || !btn) return;
+
+  modal.dataset.tipo = tipo;
+
+  // RESET
+  mensajeTxt.innerText = "";
+  box.style.display = "none";
+  check.style.display = "none";
+
+  if (tipo === "error") {
+    titulo.innerText = "⚠️ Atención";
+    mensajeTxt.innerText = mensaje;
+    btn.innerText = "Cerrar";
+  }
+
+  if (tipo === "registro") {
+    titulo.innerText = "¡Gracias por registrarte!";
+    puntos.innerText = total;
+    btn.innerText = "Continuar";
+    box.style.display = "block";
+    check.style.display = "flex";
+  }
+
+  if (tipo === "compra") {
+    titulo.innerText = "¡Gracias por tu compra!";
+    puntos.innerText = total;
+    btn.innerText = "Cerrar";
+    box.style.display = "block";
+    check.style.display = "flex";
+  }
+
+  modal.classList.add("active");
+}
+ 
+
+
+function accionModal() {
+  const modal = document.getElementById("modalRegistro");
+  const tipo = modal.dataset.tipo;
+
+  if (tipo === "registro") {
+    modal.classList.remove("active");
+    setTimeout(() => {
+      document.getElementById("modalPromo").classList.add("active");
+    }, 200);
+  } else {
+    modal.classList.remove("active");
+    limpiarInicio();
+  }
+}
+
+
+
+
+function cerrarPromo() {
+  document.getElementById("modalPromo").classList.remove("active");
+  limpiarInicio();
+}
+
+function cerrarTodo() {
+  document.getElementById("modalRegistro").classList.remove("active");
+  document.getElementById("modalPromo").classList.remove("active");
+  limpiarInicio();
+}
+
+
+function limpiarInicio() {
+  document.getElementById("telefono").value = "";
+}
+
+// ===== WHATSAPP =====
+function abrirWhatsapp() {
+  const telefono = document.getElementById("telefono").value.trim();
+
+  if (!telefono) return;
+
+  // avisamos a Google Sheets
+  fetch("https://script.google.com/macros/s/AKfycbzQuV5RCrLQ3bD6dup0ljdPEzDyTKVid0BsVkaklc8gKNZKRBSunfBWRzk67yGxzEHm/exec?telefono=${telefono}&whatsapp=SI");
+
+  // abrimos WhatsApp
+  const mensaje = encodeURIComponent(
+    "Hola 👋 Gracias por registrarme en el Club de Clientes 🎉"
+  );
+
+  window.open(
+    `https://wa.me/5491136718516?text=${mensaje}`,
+    "_blank"
+  );
+}
+
+
+
+</script>
+
+<script>
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      document.querySelector(".container").classList.add("loaded");
+    }, 1800);
+  });
+</script>
+
+<script>
+function unirseWhatsapp() {
+  const tel = document.getElementById("telefono").value.replace(/\D/g, "");
+
+  const mensaje = 
+    "Hola 👋\n" +
+    "Gracias por registrarme en el Club de Clientes 🎉\n" +
+    "Por acá quiero recibir novedades y sorteos";
+
+  const waUrl =
+    "https://wa.me/5491136718516?text=" +
+    encodeURIComponent(mensaje);
+
+  // 1️⃣ ABRIR WHATSAPP (esto NO puede esperar)
+  window.location.href = waUrl;
+
+  // 2️⃣ AVISAR A GOOGLE SHEETS EN BACKGROUND
+  setTimeout(() => {
+    fetch("https://script.google.com/macros/s/AKfycbyDG8hdDqtifyeZq-DnQXMQiTiDuBmj0k3BgDYNgTCQfnvZYo9sV_jEaxqqil6BL1Ai/exec?telefono=" + tel + "&whatsapp=SI");
+  }, 500);
+}
+</script>
+
+
+<script src="header.js"></script>
+
+</body>
+</html>

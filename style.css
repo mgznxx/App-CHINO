@@ -1,0 +1,342 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: url('fapp.jpg') no-repeat center center fixed;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+}
+
+.logo img {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  width: 70%;
+  max-width: 250px;
+  margin: 0 auto 10px;
+  display: block;
+}
+
+
+h1 {
+  margin-bottom: 22px;
+  font-size: 50px;
+  color:rgb(252, 251, 250)
+}
+
+h2 {
+  color: #7e8ef1;
+}
+.subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 50px;
+}
+
+
+input {
+  width: 90%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+button {
+  width: 95%;
+  padding: 14px;
+  font-size: 18px;
+  background-color: #ff6600;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #e65c00;
+  
+}
+
+button:active {
+  background: #155ec2;
+}
+
+
+
+#mensaje {
+  margin-top: 20px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.footer-image {
+  width: 60%;
+  max-width: 300px;
+  padding-top: 20px;
+  margin: 0 auto;
+  display: block;
+}
+
+.btn-whatsapp {
+  display: block;
+  background-color: #33ae64;
+  color: white;
+  text-align: center;
+  padding: 18px;
+  border-radius: 30px;
+  font-size: 14px;
+  /* font-weight: bold; */
+  text-decoration: none;
+  margin-top: 10px;
+}
+
+.btn-whatsapp:hover {
+  background-color: #19753e;
+}
+
+p {
+  color: rgb(133, 132, 132);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-card {
+  background: #fff;
+  width: 90%;
+  max-width: 360px;
+  border-radius: 18px;
+  padding: 25px;
+  text-align: center;
+  animation: aparecer 0.35s ease;
+}
+
+.modal-mensaje {
+  margin: 16px 0 24px;
+  font-size: 16px;
+  color: #555;
+  text-align: center;
+}
+
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-check {
+  width: 72px;
+  height: 72px;
+  background: #4fd18b;
+  border-radius: 50%;
+  box-shadow:
+  0 8px 20px rgba(79, 209, 139, 0.45),
+  0 0 0 6px rgba(79, 209, 139, 0.15);
+
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 36px;
+  color: white;
+  font-weight: bold;
+
+  margin: 0 auto 16px;
+}
+
+@keyframes popCheck {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-check {
+  animation: popCheck 0.4s ease-out;
+}
+
+
+.modal-box {
+  background: #f3f6ff;
+  border-radius: 12px;
+  padding: 15px;
+  margin: 20px 0;
+}
+
+.punto {
+  font-size: 16px;
+}
+
+.total-label {
+  font-size: 13px;
+  color: #666;
+}
+
+.total {
+  font-size: 28px;
+  font-weight: bold;
+  color: #4a5cff;
+}
+
+.contenedor-btn {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+
+}
+
+.btn-continuar {
+  width: 90%;
+  background: linear-gradient(90deg,#5b6cff,#4a5cff);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-whatsapp {
+  display: block;
+  width: 90%;
+  margin-bottom: 15px;
+  padding: 14px;
+  border-radius: 30px;
+  background: #25d366;
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+
+
+/* ANIMACION */
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---------- INTRO ---------- */
+
+.container.init {
+  justify-content: center;
+  h1 {
+  display: none;
+}
+}
+
+
+
+/* Logo centrado al inicio */
+.logo-intro {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: glow 0.5s ease-in-out infinite alternate;
+}
+
+/* Destello suave */
+@keyframes glow {
+  from {
+    filter: drop-shadow(0 0 5px #ffffffc4);
+  }
+  to {
+    filter: drop-shadow(0 0 28px #ffffff);
+  }
+}
+
+/* Contenido oculto al inicio */
+.contenido {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease;
+}
+
+/* Estado final */
+.container.loaded .logo-intro {
+  position: relative;
+  top: 0;
+  transform: translateY(0);
+  animation: none;
+  transition: all 0.8s ease;
+}
+
+.container.loaded .contenido {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+
+/* Responsive ajustes */
+@media (max-width: 480px) {
+ .container {
+    padding: 20px;
+  }
+
+  .logo img {
+    width: 70%;     /* más grande en móviles */
+    max-width: none;
+  }
+
+  body {
+    padding: 10px;
+  }
+ 
+  .formulario input,
+  .formulario button {
+    font-size: 14px;
+  }
+
+  .footer-image {
+  width: 60%;
+  max-width: 300px;
+  padding-top: 50px;
+  margin: 0 auto;
+  display: block;
+}
+
+}
+

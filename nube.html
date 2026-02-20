@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sorteo Globo de Nombres con Haz de Luz</title>
+  <link rel="stylesheet" href="style2.css" />  
+</head>
+<body>
+  <h1 id="titulo">🎉 SORTEO CLUB DE CLIENTES 🎉</h1>
+  <div id="legend">
+    <div class="item"><span class="circle blue"></span> 1–3 compras</div>
+    <div class="item"><span class="circle yellow"></span> 4–7 compras</div>
+    <div class="item"><span class="circle red"></span> 8–15 compras</div>
+    <div class="item"><span class="circle green"></span> +15 compras</div>
+  </div>
+  
+  <canvas id="globo"></canvas>
+  <div id="controls">
+    <button id="startBtn">Comenzar Sorteo</button>
+    <button id="resetBtn">Reset</button> 
+    <button id="showWinnerBtn" style="display:none;">
+  Mostrar ganador
+</button>
+    
+  </div>  
+  <div id="ganadorBox"></div>
+<script>
+  const MODO_REVELACION_GRANDE = true;
+
+  const canvas = document.getElementById('globo');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  let puntos = [];
+
+  function obtenerColorPorCompras(puntos){
+    if(puntos >= 1 && puntos <= 3) return "rgb(215, 119, 227)";
+    if(puntos >= 4 && puntos <= 7) return "rgb(228,236,140)";
+    if(puntos >= 8 && puntos <= 15) return "rgb(238,72,72)";
+    if(puntos > 15) return "rgb(94,199,94)";
+    return "white";
+  }
+
+  async function cargarDatos() {
+    try {
+      const response = await fetch("https://script.google.com/macros/s/AKfycbyDG8hdDqtifyeZq-DnQXMQiTiDuBmj0k3BgDYNgTCQfnvZYo9sV_jEaxqqil6BL1Ai/exec?modo=sorteo");
+      const data = await response.json();
+
+      if (!data || data.length === 0) {
+        alert("No hay participantes en la hoja");
+        return;
+      }
+
+      puntos = data.map((item,i)=>{
+        const phi = Math.acos(-1 + (2*i)/data.length);
+        const theta = Math.sqrt(data.length * Math.PI) * phi;
+
+        return {
+          texto: item.telefono,
+          compras: item.puntos,
+          phi,
+          theta,
+          color: obtenerColorPorCompras(item.puntos),
+          sinPhi: Math.sin(phi),
+          cosPhi: Math.cos(phi)
+        };
+      });
+
+    } catch(error) {
+      console.error("Error cargando participantes:", error);
+      alert("Error cargando participantes");
+    }
+  }
+
+  let rotY = 0, ganador = null, confeti = [], scannerAngle = 0, buscando = false, vueltas = 0;
+
+  const radiusSmall = Math.min(canvas.width/2, canvas.height/2)*0.4;
+  const radiusLarge = Math.min(canvas.width/2, canvas.height/2)*0.7;
+  let radiusAnim = radiusSmall; 
+  let targetRadius = radiusSmall;
+  let velocity = 0;
+
+  class Confeti {
+    constructor(originSide) {
+      this.x = originSide === 'left' ? 0 : canvas.width;
+      this.y = canvas.height;
+      this.size = Math.random() * 6 + 3;
+      this.color = `hsl(${Math.random()*360},100%,50%)`;
+      const angleRange = originSide === 'left' ? [15,75] : [105,165];
+      const angleDeg = Math.random()*(angleRange[1]-angleRange[0])+angleRange[0];
+      const angle = angleDeg * Math.PI/180;
+      const speed = Math.random()*20+20;
+      this.vx = Math.cos(angle)*speed;
+      this.vy = -Math.sin(angle)*speed;
+      this.gravity = 0.25;
+      this.friction = 0.98;
+      this.rotation = Math.random() * 360;
+      this.rotationSpeed = (Math.random()-0.5)*10;
+      this.hitCeiling = false;
+    }
+
+    update(alturaTituloPx) {
+      this.vx *= this.friction;
+      this.vy *= this.friction;
+      this.x += this.vx;
+      this.y += this.vy;
+      this.rotation += this.rotationSpeed;
+
+      if (!this.hitCeiling) {
+        if (this.y <= alturaTituloPx && this.vy < 0) {
+          this.hitCeiling = true;
+          this.vy = Math.random() * 5 + 2;
+          this.vx = (Math.random() - 0.5) * 4;
+        } else {
+          this.vy += this.gravity;
+        }
+      } else {
+        this.vy += 0.9;
+      }
+    }
+
+    draw(ctx) {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation * Math.PI/180);
+      ctx.fillStyle = this.color;
+      ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+      ctx.restore();
+    }
+  }
+
+  function dibujar(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const cx = canvas.width/2, cy = canvas.height/2;
+
+    const stiffness = 0.15;
+    const damping = 0.75;
+    let force = (targetRadius - radiusAnim) * stiffness;
+    velocity = (velocity + force) * damping;
+    radiusAnim += velocity;
+
+    puntos.forEach(p=>{
+      const x = radiusAnim * p.sinPhi * Math.cos(p.theta+rotY);
+      const y = radiusAnim * p.cosPhi;
+      const z = radiusAnim * p.sinPhi * Math.sin(p.theta+rotY);
+      const scale = 300/(300+z);
+      const px = cx + x*scale, py = cy + y*scale;
+
+      let angle = (p.theta+rotY) % (2*Math.PI);
+      let diff = Math.abs(scannerAngle - angle);
+
+      if(buscando && diff < 0.3){
+        ctx.fillStyle = "rgba(0,255,255,0.9)";
+        ctx.font = `${16*scale}px Arial Black`;
+      } else {
+        ctx.fillStyle = p.color;
+        ctx.font = `${12*scale}px Arial`;
+      }
+
+      ctx.globalAlpha = scale/2;
+      ctx.fillText(p.texto, px, py);
+    });
+
+    ctx.globalAlpha = 1;
+
+    confeti.forEach((c, i) => {
+      c.update(-10);
+      c.draw(ctx);
+      if(c.y > canvas.height){
+        confeti.splice(i,1);
+      }
+    });
+
+    rotY += 0.02;
+
+    if(buscando){
+      scannerAngle += 0.05;
+      if(scannerAngle > 2*Math.PI){ scannerAngle = 0; vueltas++; }
+    }
+
+    requestAnimationFrame(dibujar);
+  }
+
+  function buscarGanador(){
+    buscando = true; vueltas = 0;
+    targetRadius = radiusLarge;
+
+    document.getElementById("controls").style.display = "none";
+    document.getElementById("legend").style.display = "none";
+    document.getElementById("titulo").style.display = "none";
+    document.getElementById("ganadorBox").style.display = "none";
+
+    let checkInterval = setInterval(()=>{
+      if(vueltas >= 3){
+        clearInterval(checkInterval);
+        buscando = false;
+        elegirGanador();
+      }
+    },500);
+  }
+
+  function elegirGanador(){
+    let totalPeso = 0;
+    puntos.forEach(p => totalPeso += p.compras);
+
+    let random = Math.random() * totalPeso;
+    let acumulado = 0;
+
+    for(let p of puntos){
+      acumulado += p.compras;
+      if(random <= acumulado){
+        ganador = p;
+        break;
+      }
+    }
+
+    const box = document.getElementById("ganadorBox");
+box.innerHTML = "EL GANADOR ES:<br>"+ganador.texto;                
+box.style.display = "block";
+document.getElementById("showWinnerBtn").style.display = "inline-block";
+
+targetRadius = radiusSmall;
+
+document.getElementById("controls").style.display = "flex";
+document.getElementById("legend").style.display = "flex";
+document.getElementById("titulo").style.display = "block";
+
+    targetRadius = radiusSmall;
+
+    document.getElementById("controls").style.display = "flex";
+    document.getElementById("legend").style.display = "flex";
+    document.getElementById("titulo").style.display = "block";
+
+    lanzarConfeti();
+     
+  }
+
+  function lanzarConfeti(){
+    const cantidad = 50;
+    for(let i=0;i<cantidad;i++){
+      confeti.push(new Confeti('left'));
+      confeti.push(new Confeti('right'));
+    }
+  }
+
+  document.getElementById("startBtn").addEventListener("click", ()=>{
+    confeti = []; ganador = null; buscarGanador();
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", ()=>{
+    document.getElementById("ganadorBox").style.display = "none";
+    confeti = []; ganador = null; buscando = false; vueltas = 0;
+    targetRadius = radiusSmall;
+    document.getElementById("controls").style.display = "flex";
+    document.getElementById("legend").style.display = "flex";
+    document.getElementById("titulo").style.display = "block";
+  });
+
+  cargarDatos();
+  dibujar();
+
+  function mostrarRevelacion(ganador){
+
+    const overlay = document.createElement("div");
+    overlay.id = "overlayGanador";
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.background = "rgba(0,0,0,0.85)";
+    overlay.style.display = "flex";
+    overlay.style.justifyContent = "center";
+    overlay.style.alignItems = "center";
+    overlay.style.zIndex = "9999";
+    overlay.style.flexDirection = "column";
+
+    const tarjeta = document.createElement("div");
+    tarjeta.style.background = "white";
+    tarjeta.style.padding = "50px 80px";
+    tarjeta.style.borderRadius = "25px";
+    tarjeta.style.textAlign = "center";
+    tarjeta.style.boxShadow = "0 0 50px gold";
+
+    tarjeta.innerHTML = `
+        <h1 style="font-size:40px;">🎉 GRAN GANADOR 🎉</h1>
+        <h2 style="font-size:50px; color:red; margin:20px 0;">
+            ${ganador.texto}
+        </h2>
+        <button id="cerrarOverlay"
+            style="padding:12px 30px; font-size:18px; border:none; border-radius:10px; cursor:pointer; background:#e60000; color:white;">
+            Cerrar
+        </button>
+    `;
+
+    overlay.appendChild(tarjeta);
+    document.body.appendChild(overlay);
+
+    document.getElementById("cerrarOverlay").onclick = function(){
+        overlay.remove();
+
+        // volvemos a mostrar controles
+        document.getElementById("controls").style.display = "flex";
+        document.getElementById("legend").style.display = "flex";
+        document.getElementById("titulo").style.display = "block";
+    };
+}
+
+function mostrarPantallaGrande(){
+
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.background = "rgba(0,0,0,0.7)";
+  overlay.style.display = "flex";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.zIndex = "9999";
+
+  const tarjeta = document.createElement("div");
+  tarjeta.style.background = "#111";
+  tarjeta.style.color = "#fff";
+  tarjeta.style.padding = "60px 100px";
+  tarjeta.style.borderRadius = "20px";
+  tarjeta.style.textAlign = "center";
+
+  tarjeta.innerHTML = `
+    <h1 style="font-size:45px;">EL GANADOR ES</h1>
+    <h2 style="font-size:60px; margin:20px 0; color:#00ffcc;">
+      ${ganador.texto}
+    </h2>
+    <button id="cerrarOverlay" style="padding:10px 25px; cursor:pointer;">
+      Cerrar
+    </button>
+  `;
+
+  overlay.appendChild(tarjeta);
+  document.body.appendChild(overlay);
+
+  document.getElementById("cerrarOverlay").onclick = function(){
+    overlay.remove();
+  };
+}
+ 
+
+document.getElementById("showWinnerBtn").addEventListener("click", ()=>{
+  if(ganador){
+    mostrarPantallaGrande();
+  }
+});
+
+
+</script>
+<script src="header.js"></script>
+
+</body>
+</html>

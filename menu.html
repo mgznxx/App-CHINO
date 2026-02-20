@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Club de Clientes</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background-color: #09359b;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(13, 242, 242, 0.25) 35%, transparent 80%),
+                linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+                linear-gradient(rgba(13, 242, 242, 0.03) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(13, 242, 242, 0.03) 2px, transparent 2px); 
+           background-size: 100% 100%, 40px 40px, 40px 40px, 120px 120px, 120px 120px;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+/* HEADER */
+header{
+  width:100%;
+  padding:15px;
+  background:#e60000;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-sizing:border-box;
+}
+
+header h1{
+  font-size:18px;
+  margin:0;
+}
+
+/* HAMBURGUESA */
+.menu-icon{
+  font-size:28px;
+  cursor:pointer;
+}
+
+/* MENU LATERAL */
+.side-menu{
+  position:fixed;
+  top:0;
+  right:-250px;
+  width:250px;
+  height:100%;
+  background:#222;
+  padding-top:60px;
+  transition:0.3s;
+}
+
+.side-menu a{
+  display:block;
+  padding:15px;
+  color:white;
+  text-decoration:none;
+  border-bottom:1px solid #444;
+}
+
+.side-menu a:hover{
+  background:#333;
+}
+
+/* BOTONES PRINCIPALES */
+.container{
+  margin-top:80px;
+  width:70%;
+  max-width:400px;
+}
+
+.big-btn{
+  width:100%;
+  padding:25px;
+  margin-bottom:25px;
+  font-size:16px;
+  border:none;
+  border-radius:15px;
+  cursor:pointer;
+  background:#00ffcc62;
+  color:#fbfafa;
+}
+
+.big-btn:nth-child(2){
+  background:#ffd9005c;
+}
+
+.big-btn:nth-child(3){
+  background:#ff444464;
+  color:white;
+}
+</style>
+</head>
+
+<body>
+
+<body>
+
+<!-- LOGO ARRIBA -->
+<div style="
+  width:100%;
+  display:flex;
+  justify-content:center;
+  margin-top:20px;
+">
+  <img src="LogoClub.png" style="
+      width:120px;
+      opacity:0.9;
+  ">
+</div>
+
+<div class="container">
+  <button class="big-btn" onclick="location.href='index.html'">
+    > Registrar
+  </button>
+
+  <button class="big-btn" onclick="location.href='clientes.html'" >
+    > Clientes
+  </button>
+
+  <button class="big-btn" onclick="location.href='nube.html'">
+    > Sorteo
+  </button>
+</div>
+
+ 
+
+
+ 
+
+<script>
+function toggleMenu(){
+  const menu = document.getElementById("sideMenu");
+  if(menu.style.right === "0px"){
+    menu.style.right = "-250px";
+  } else {
+    menu.style.right = "0px";
+  }
+}
+</script>
+<script src="header.js"></script>
+</body>
+</html>

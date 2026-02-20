@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planilla Clientes</title>
+<h5 id="totalClientes"></h5>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background-color: #09359b;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(13, 242, 242, 0.25) 35%, transparent 80%),
+                linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+                linear-gradient(rgba(13, 242, 242, 0.03) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(13, 242, 242, 0.03) 2px, transparent 2px); 
+           background-size: 100% 100%, 40px 40px, 40px 40px, 120px 120px, 120px 120px;
+  color:white;
+  padding:15px;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:15px;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-bottom:15px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  background:#0a79f7;
+  color:black;
+}
+
+.table-container{
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:600px;
+}
+
+th, td{
+  padding:10px;
+  border-bottom:1px solid #333;
+  text-align:left;
+  font-size:14px;
+}
+
+th{
+  background:#222;
+  position:sticky;
+  top:0;
+}
+
+tr:nth-child(even){
+  background:#1a1a1a;
+}
+
+.loading{
+  text-align:center;
+  margin-top:30px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Planilla de Clientes</h1>
+
+<button onclick="cargarDatos()">🔄 Actualizar</button>
+
+<div class="table-container">
+  <table id="tablaClientes"></table>
+</div>
+
+<div id="loading" class="loading">Cargando datos...</div>
+
+<script>
+
+const URL = "https://script.google.com/macros/s/AKfycbyDG8hdDqtifyeZq-DnQXMQiTiDuBmj0k3BgDYNgTCQfnvZYo9sV_jEaxqqil6BL1Ai/exec?modo=planilla";
+
+async function cargarDatos(){
+  const tabla = document.getElementById("tablaClientes");
+  const loading = document.getElementById("loading");
+
+  tabla.innerHTML = "";
+  loading.style.display = "block";
+
+  try{
+    const response = await fetch(URL);
+    const data = await response.json();
+    document.getElementById("totalClientes").innerText =
+  "Total clientes: " + data.length;
+
+    if(data.length === 0){
+      loading.innerText = "No hay datos";
+      return;
+    }
+
+    loading.style.display = "none";
+
+    // Crear encabezados dinámicos
+    const headers = Object.keys(data[0]);
+    let thead = "<tr>";
+    headers.forEach(h=>{
+      thead += `<th>${h.toUpperCase()}</th>`;
+    });
+    thead += "</tr>";
+
+    tabla.innerHTML += thead;
+
+    // Crear filas
+    data.forEach(row=>{
+      let fila = "<tr>";
+      headers.forEach(h=>{
+        fila += `<td>${row[h]}</td>`;
+      });
+      fila += "</tr>";
+      tabla.innerHTML += fila;
+    });
+
+  }catch(error){
+    loading.innerText = "Error cargando datos";
+    console.error(error);
+  }
+}
+
+// Auto carga al abrir
+cargarDatos();
+
+</script>
+
+<script src="header.js"></script>
+
+</body>
+</html>
+
