@@ -32,12 +32,12 @@ button{
   padding:12px;
   margin-bottom:15px;
   border:none;
-  border-radius:10px;
+  border-radius:30px;
   font-size:16px;
   font-weight:bold;
   cursor:pointer;
-  background:#0a79f7;
-  color:black;
+  background:#03c4fa95;
+  color:rgb(232, 229, 229);
 }
 
 .table-container{
@@ -76,7 +76,7 @@ tr:nth-child(even){
 
 <body>
 
-<h1>Planilla de Clientes</h1>
+<h1>Clientes</h1>
 
 <button onclick="cargarDatos()">🔄 Actualizar</button>
 
@@ -87,7 +87,6 @@ tr:nth-child(even){
 <div id="loading" class="loading">Cargando datos...</div>
 
 <script>
-
 const URL = "https://script.google.com/macros/s/AKfycbyDG8hdDqtifyeZq-DnQXMQiTiDuBmj0k3BgDYNgTCQfnvZYo9sV_jEaxqqil6BL1Ai/exec?modo=planilla";
 
 async function cargarDatos(){
@@ -101,7 +100,7 @@ async function cargarDatos(){
     const response = await fetch(URL);
     const data = await response.json();
     document.getElementById("totalClientes").innerText =
-  "Total clientes: " + data.length;
+      "Total clientes: " + data.length;
 
     if(data.length === 0){
       loading.innerText = "No hay datos";
@@ -123,8 +122,25 @@ async function cargarDatos(){
     // Crear filas
     data.forEach(row=>{
       let fila = "<tr>";
-      headers.forEach(h=>{
-        fila += `<td>${row[h]}</td>`;
+      headers.forEach((h, index)=>{
+        let valor = row[h];
+        let estilo = "";
+
+        // Si es la cuarta columna (index 3)
+        if(index === 3){
+          let puntos = parseInt(valor, 10);
+          if(puntos >= 1 && puntos <= 3){
+            estilo = "color: rgb(215, 119, 227);";
+          }else if(puntos >= 4 && puntos <= 7){
+            estilo = "color: rgb(228, 236, 140);";
+          }else if(puntos >= 8 && puntos <= 15){
+            estilo = "color: rgb(238, 72, 72);";
+          }else if(puntos > 15){
+            estilo = "color: rgb(94, 199, 94);";
+          }
+        }
+
+        fila += `<td style="${estilo}">${valor}</td>`;
       });
       fila += "</tr>";
       tabla.innerHTML += fila;
@@ -138,7 +154,6 @@ async function cargarDatos(){
 
 // Auto carga al abrir
 cargarDatos();
-
 </script>
 
 <script src="header.js"></script>

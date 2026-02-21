@@ -36,9 +36,9 @@ document.addEventListener("DOMContentLoaded", function(){
       z-index:9999;
   ">
       <a href="menu.html" style="display:block;padding:15px;color:white;text-decoration:none;border-bottom:1px solid #333;">Inicio</a>
-      <a href="index.html" style="display:block;padding:15px;color:white;text-decoration:none;border-bottom:1px solid #333;">Registrar Celulares</a>
-      <a href="clientes.html" style="display:block;padding:15px;color:white;text-decoration:none;border-bottom:1px solid #333;">Ver Datos Clientes</a>
-      <a href="nube.html" style="display:block;padding:15px;color:white;text-decoration:none;border-bottom:1px solid #333;">Pantalla Sorteo</a>
+      <a href="index.html" style="display:block;padding:15px;color:white;text-decoration:none;border-bottom:1px solid #333;"> Registrar</a>
+      <a href="clientes.html" style="display:block;padding:15px;color:white;text-decoration:none;border-bottom:1px solid #333;"> Clientes</a>
+      <a href="nube.html" style="display:block;padding:15px;color:white;text-decoration:none;border-bottom:1px solid #333;"> Sorteo</a>
   </div>
 
   <!-- FONDO OSCURO AL ABRIR -->
