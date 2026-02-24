@@ -14,9 +14,6 @@
     <div class="logo logo-intro">
       <img src="LogoClub.png" alt="Club de Clientes" />
     </div>
-    <!-- <h1 class="subtitle">Bienvenidos</h1> -->
-
-
     <div class="contenido">
       <input
         type="tel"
@@ -103,15 +100,13 @@ let esRegistro = false;
   const telefono = document.getElementById("telefono").value.trim();
 
   if (!telefono) {
-    abrirModal(
-      "error",
-      "Por favor ingresá tu número de celular",
-      "—"
-    );
+    abrirModal("error", "Por favor ingresá tu número de celular", "—");
     return;
   }
 
-  fetch("https://script.google.com/macros/s/AKfycbzQuV5RCrLQ3bD6dup0ljdPEzDyTKVid0BsVkaklc8gKNZKRBSunfBWRzk67yGxzEHm/exec?modo=registro&telefono=" + telefono)
+  fetch("https://script.google.com/macros/s/AKfycbwUl31-IGLZR8j8EotlvdjdIKTZDTIaZkdfMRfLf87eO0QU20Reuqc9vizYMV6BIUQq/exec?modo=registro&telefono=" 
+  + telefono + 
+  "&key=CLUB2026SEGURA")
 
     .then(res => res.text())
     .then(texto => {
@@ -130,11 +125,7 @@ let esRegistro = false;
       );
     })
     .catch(() => {
-      abrirModal(
-        "error",
-        "Error de conexión. Intentá nuevamente",
-        "—"
-      );
+      abrirModal("error", "Error de conexión. Intentá nuevamente", "—");
     });
 }
 
@@ -224,20 +215,19 @@ function abrirWhatsapp() {
 
   if (!telefono) return;
 
-  // avisamos a Google Sheets
-  fetch("https://script.google.com/macros/s/AKfycbzQuV5RCrLQ3bD6dup0ljdPEzDyTKVid0BsVkaklc8gKNZKRBSunfBWRzk67yGxzEHm/exec?telefono=${telefono}&whatsapp=SI");
+  fetch("https://script.google.com/macros/s/AKfycbwUl31-IGLZR8j8EotlvdjdIKTZDTIaZkdfMRfLf87eO0QU20Reuqc9vizYMV6BIUQq/exec?telefono=" 
+  + telefono + 
+  "&whatsapp=SI&key=CLUB2026SEGURA");
 
-  // abrimos WhatsApp
   const mensaje = encodeURIComponent(
     "Hola 👋 Gracias por registrarme en el Club de Clientes 🎉"
   );
 
   window.open(
-    `https://wa.me/5491136718516?text=${mensaje}`,
+    "https://wa.me/5491136718516?text=" + mensaje,
     "_blank"
   );
 }
-
 
 
 </script>
@@ -268,7 +258,7 @@ function unirseWhatsapp() {
 
   // 2️⃣ AVISAR A GOOGLE SHEETS EN BACKGROUND
   setTimeout(() => {
-    fetch("https://script.google.com/macros/s/AKfycbyDG8hdDqtifyeZq-DnQXMQiTiDuBmj0k3BgDYNgTCQfnvZYo9sV_jEaxqqil6BL1Ai/exec?telefono=" + tel + "&whatsapp=SI");
+    fetch("https://script.google.com/macros/s/AKfycbwUl31-IGLZR8j8EotlvdjdIKTZDTIaZkdfMRfLf87eO0QU20Reuqc9vizYMV6BIUQq/exec?telefono=" + tel + "&whatsapp=SI&key=CLUB2026SEGURA");
   }, 500);
 }
 </script>

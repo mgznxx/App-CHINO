@@ -44,7 +44,9 @@
 
   async function cargarDatos() {
     try {
-      const response = await fetch("https://script.google.com/macros/s/AKfycbyDG8hdDqtifyeZq-DnQXMQiTiDuBmj0k3BgDYNgTCQfnvZYo9sV_jEaxqqil6BL1Ai/exec?modo=sorteo");
+      const BASE_URL = "https://script.google.com/macros/s/AKfycbwUl31-IGLZR8j8EotlvdjdIKTZDTIaZkdfMRfLf87eO0QU20Reuqc9vizYMV6BIUQq/exec";
+      const KEY = "CLUB2026SEGURA";
+      const response = await fetch(`${BASE_URL}?modo=sorteo&key=${KEY}`);
       const data = await response.json();
 
       if (!data || data.length === 0) {

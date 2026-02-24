@@ -87,20 +87,31 @@ tr:nth-child(even){
 <div id="loading" class="loading">Cargando datos...</div>
 
 <script>
-const URL = "https://script.google.com/macros/s/AKfycbyDG8hdDqtifyeZq-DnQXMQiTiDuBmj0k3BgDYNgTCQfnvZYo9sV_jEaxqqil6BL1Ai/exec?modo=planilla";
+
+const BASE_URL = "https://script.google.com/macros/s/AKfycbwUl31-IGLZR8j8EotlvdjdIKTZDTIaZkdfMRfLf87eO0QU20Reuqc9vizYMV6BIUQq/exec";
+const KEY = "CLUB2026SEGURA";
 
 async function cargarDatos(){
+
   const tabla = document.getElementById("tablaClientes");
   const loading = document.getElementById("loading");
+  const totalClientes = document.getElementById("totalClientes");
 
   tabla.innerHTML = "";
   loading.style.display = "block";
 
-  try{
-    const response = await fetch(URL);
+  try {
+
+    const response = await fetch(`${BASE_URL}?modo=planilla&key=${KEY}`);
     const data = await response.json();
-    document.getElementById("totalClientes").innerText =
-      "Total clientes: " + data.length;
+
+    if(!Array.isArray(data)){
+      loading.innerText = "Error de acceso";
+      console.error(data);
+      return;
+    }
+
+    totalClientes.innerText = "Total clientes: " + data.length;
 
     if(data.length === 0){
       loading.innerText = "No hay datos";
@@ -109,8 +120,8 @@ async function cargarDatos(){
 
     loading.style.display = "none";
 
-    // Crear encabezados dinámicos
     const headers = Object.keys(data[0]);
+
     let thead = "<tr>";
     headers.forEach(h=>{
       thead += `<th>${h.toUpperCase()}</th>`;
@@ -119,41 +130,44 @@ async function cargarDatos(){
 
     tabla.innerHTML += thead;
 
-    // Crear filas
     data.forEach(row=>{
       let fila = "<tr>";
+
       headers.forEach((h, index)=>{
         let valor = row[h];
         let estilo = "";
 
-        // Si es la cuarta columna (index 3)
         if(index === 3){
           let puntos = parseInt(valor, 10);
-          if(puntos >= 1 && puntos <= 3){
-            estilo = "color: rgb(215, 119, 227);";
-          }else if(puntos >= 4 && puntos <= 7){
-            estilo = "color: rgb(228, 236, 140);";
-          }else if(puntos >= 8 && puntos <= 15){
-            estilo = "color: rgb(238, 72, 72);";
-          }else if(puntos > 15){
-            estilo = "color: rgb(94, 199, 94);";
-          }
+
+          if(puntos >= 1 && puntos <= 3)
+            estilo = "color: rgb(215,119,227);";
+
+          else if(puntos >= 4 && puntos <= 7)
+            estilo = "color: rgb(228,236,140);";
+
+          else if(puntos >= 8 && puntos <= 15)
+            estilo = "color: rgb(238,72,72);";
+
+          else if(puntos > 15)
+            estilo = "color: rgb(94,199,94);";
         }
 
         fila += `<td style="${estilo}">${valor}</td>`;
       });
+
       fila += "</tr>";
       tabla.innerHTML += fila;
     });
 
-  }catch(error){
+  } catch(error){
     loading.innerText = "Error cargando datos";
     console.error(error);
   }
 }
 
-// Auto carga al abrir
 cargarDatos();
+
 </script>
 
 <script src="header.js"></script>
