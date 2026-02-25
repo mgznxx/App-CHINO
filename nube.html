@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sorteo Globo de Nombres con Haz de Luz</title>
   <link rel="stylesheet" href="style2.css" />  
 </head>
@@ -25,9 +26,11 @@
   </div>  
   <div id="ganadorBox"></div>
 <script>
-  const MODO_REVELACION_GRANDE = true;
+   
 
-  const canvas = document.getElementById('globo');
+const MODO_REVELACION_GRANDE = true;
+
+const canvas = document.getElementById('globo');
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -42,38 +45,38 @@
     return "white";
   }
 
-  async function cargarDatos() {
-    try {
-      const BASE_URL = "https://script.google.com/macros/s/AKfycbwUl31-IGLZR8j8EotlvdjdIKTZDTIaZkdfMRfLf87eO0QU20Reuqc9vizYMV6BIUQq/exec";
-      const KEY = "CLUB2026SEGURA";
-      const response = await fetch(`${BASE_URL}?modo=sorteo&key=${KEY}`);
-      const data = await response.json();
+ async function cargarDatos() {
+  try {
+    const BASE_URL = "https://script.google.com/macros/s/AKfycbwUl31-IGLZR8j8EotlvdjdIKTZDTIaZkdfMRfLf87eO0QU20Reuqc9vizYMV6BIUQq/exec";
+    const KEY = "CLUB2026SEGURA";
+    const response = await fetch(`${BASE_URL}?modo=sorteo&key=${KEY}`);
+    const data = await response.json();
 
-      if (!data || data.length === 0) {
-        alert("No hay participantes en la hoja");
-        return;
-      }
-
-      puntos = data.map((item,i)=>{
-        const phi = Math.acos(-1 + (2*i)/data.length);
-        const theta = Math.sqrt(data.length * Math.PI) * phi;
-
-        return {
-          texto: item.telefono,
-          compras: item.puntos,
-          phi,
-          theta,
-          color: obtenerColorPorCompras(item.puntos),
-          sinPhi: Math.sin(phi),
-          cosPhi: Math.cos(phi)
-        };
-      });
-
-    } catch(error) {
-      console.error("Error cargando participantes:", error);
-      alert("Error cargando participantes");
+    if (!data || data.length === 0) {
+      alert("No hay participantes en la hoja");
+      return;
     }
+
+    puntos = data.map((item, i) => {
+      const phi = Math.acos(-1 + (2 * i) / data.length);
+      const theta = Math.sqrt(data.length * Math.PI) * phi;
+
+      return {
+        texto: item.telefono,
+        compras: parseInt(item.puntos) || 1,
+        phi,
+        theta,
+        color: obtenerColorPorCompras(parseInt(item.puntos)),
+        sinPhi: Math.sin(phi),
+        cosPhi: Math.cos(phi)
+      };
+    });
+
+  } catch (error) {
+    console.error("Error cargando participantes:", error);
+    alert("Error cargando participantes");
   }
+}  
 
   let rotY = 0, ganador = null, confeti = [], scannerAngle = 0, buscando = false, vueltas = 0;
 
@@ -101,6 +104,7 @@
       this.rotationSpeed = (Math.random()-0.5)*10;
       this.hitCeiling = false;
     }
+    
 
     update(alturaTituloPx) {
       this.vx *= this.friction;
@@ -131,7 +135,12 @@
       ctx.restore();
     }
   }
-
+function lanzarConfeti(){
+  for(let i = 0; i < 80; i++){
+    const lado = Math.random() > 0.5 ? 'left' : 'right';
+    confeti.push(new Confeti(lado));
+  }
+}
   function dibujar(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     const cx = canvas.width/2, cy = canvas.height/2;
@@ -184,132 +193,83 @@
     requestAnimationFrame(dibujar);
   }
 
-  function buscarGanador(){
-    buscando = true; vueltas = 0;
-    targetRadius = radiusLarge;
+ function buscarGanador(){
+  buscando = true;
+  vueltas = 0;
+  scannerAngle = 0;
+  targetRadius = radiusLarge;
 
-    document.getElementById("controls").style.display = "none";
-    document.getElementById("legend").style.display = "none";
-    document.getElementById("titulo").style.display = "none";
-    document.getElementById("ganadorBox").style.display = "none";
+  document.getElementById("controls").style.display = "none";
+  document.getElementById("legend").style.display = "none";
+  document.getElementById("titulo").style.display = "none";
+  document.getElementById("ganadorBox").style.display = "none";
 
-    let checkInterval = setInterval(()=>{
-      if(vueltas >= 3){
-        clearInterval(checkInterval);
-        buscando = false;
-        elegirGanador();
-      }
-    },500);
+  // ⏳ Espera fija de 4 segundos
+  setTimeout(()=>{
+    buscando = false;
+    elegirGanador();
+  }, 4000);
+}  
+
+// =============================
+// 🎯 ELEGIR GANADOR
+// =============================
+ function elegirGanador(){
+
+  if(!puntos || puntos.length === 0){
+    alert("No hay participantes");
+    return;
   }
 
-  function elegirGanador(){
-    let totalPeso = 0;
-    puntos.forEach(p => totalPeso += p.compras);
+  let totalPeso = 0;
 
-    let random = Math.random() * totalPeso;
-    let acumulado = 0;
+  puntos.forEach(p => {
+    p.compras = parseInt(p.compras) || 0;
+    totalPeso += p.compras;
+  });
 
-    for(let p of puntos){
-      acumulado += p.compras;
-      if(random <= acumulado){
-        ganador = p;
-        break;
-      }
-    }
-
-    const box = document.getElementById("ganadorBox");
-box.innerHTML = "EL GANADOR ES:<br>"+ganador.texto;                
-box.style.display = "block";
-document.getElementById("showWinnerBtn").style.display = "inline-block";
-
-targetRadius = radiusSmall;
-
-document.getElementById("controls").style.display = "flex";
-document.getElementById("legend").style.display = "flex";
-document.getElementById("titulo").style.display = "block";
-
-    targetRadius = radiusSmall;
-
-    document.getElementById("controls").style.display = "flex";
-    document.getElementById("legend").style.display = "flex";
-    document.getElementById("titulo").style.display = "block";
-
-    lanzarConfeti();
-     
+  if(totalPeso === 0){
+    alert("Todos los participantes tienen 0 puntos");
+    return;
   }
 
-  function lanzarConfeti(){
-    const cantidad = 50;
-    for(let i=0;i<cantidad;i++){
-      confeti.push(new Confeti('left'));
-      confeti.push(new Confeti('right'));
+  let random = Math.random() * totalPeso;
+  let acumulado = 0;
+
+  for(let p of puntos){
+    acumulado += p.compras;
+    if(random <= acumulado){
+      ganador = p;
+      break;
     }
   }
 
-  document.getElementById("startBtn").addEventListener("click", ()=>{
-    confeti = []; ganador = null; buscarGanador();
-  });
+  if(!ganador){
+    alert("No se pudo seleccionar ganador");
+    return;
+  }
 
-  document.getElementById("resetBtn").addEventListener("click", ()=>{
-    document.getElementById("ganadorBox").style.display = "none";
-    confeti = []; ganador = null; buscando = false; vueltas = 0;
-    targetRadius = radiusSmall;
-    document.getElementById("controls").style.display = "flex";
-    document.getElementById("legend").style.display = "flex";
-    document.getElementById("titulo").style.display = "block";
-  });
+  const box = document.getElementById("ganadorBox");
+  box.innerHTML = "EL GANADOR ES:<br>" + ganador.texto;                
+  box.style.display = "block";
 
-  cargarDatos();
-  dibujar();
+  // mostramos botón revelar
+  document.getElementById("showWinnerBtn").style.display = "inline-block";
 
-  function mostrarRevelacion(ganador){
+  targetRadius = radiusSmall;
 
-    const overlay = document.createElement("div");
-    overlay.id = "overlayGanador";
-    overlay.style.position = "fixed";
-    overlay.style.top = "0";
-    overlay.style.left = "0";
-    overlay.style.width = "100%";
-    overlay.style.height = "100%";
-    overlay.style.background = "rgba(0,0,0,0.85)";
-    overlay.style.display = "flex";
-    overlay.style.justifyContent = "center";
-    overlay.style.alignItems = "center";
-    overlay.style.zIndex = "9999";
-    overlay.style.flexDirection = "column";
+  document.getElementById("controls").style.display = "flex";
+  document.getElementById("legend").style.display = "flex";
+  document.getElementById("titulo").style.display = "block";
 
-    const tarjeta = document.createElement("div");
-    tarjeta.style.background = "white";
-    tarjeta.style.padding = "50px 80px";
-    tarjeta.style.borderRadius = "25px";
-    tarjeta.style.textAlign = "center";
-    tarjeta.style.boxShadow = "0 0 50px gold";
-
-    tarjeta.innerHTML = `
-        <h1 style="font-size:40px;">🎉 GRAN GANADOR 🎉</h1>
-        <h2 style="font-size:50px; color:red; margin:20px 0;">
-            ${ganador.texto}
-        </h2>
-        <button id="cerrarOverlay"
-            style="padding:12px 30px; font-size:18px; border:none; border-radius:10px; cursor:pointer; background:#e60000; color:white;">
-            Cerrar
-        </button>
-    `;
-
-    overlay.appendChild(tarjeta);
-    document.body.appendChild(overlay);
-
-    document.getElementById("cerrarOverlay").onclick = function(){
-        overlay.remove();
-
-        // volvemos a mostrar controles
-        document.getElementById("controls").style.display = "flex";
-        document.getElementById("legend").style.display = "flex";
-        document.getElementById("titulo").style.display = "block";
-    };
+  lanzarConfeti();
 }
 
-function mostrarPantallaGrande(){
+
+// =============================
+// 🖥 PANTALLA GRANDE RESPONSIVE
+// =============================
+function mostrarPantallaGrande(ganador){
 
   const overlay = document.createElement("div");
   overlay.style.position = "fixed";
@@ -317,25 +277,41 @@ function mostrarPantallaGrande(){
   overlay.style.left = "0";
   overlay.style.width = "100%";
   overlay.style.height = "100%";
-  overlay.style.background = "rgba(0,0,0,0.7)";
+  overlay.style.background = "rgba(0,0,0,0.85)";
   overlay.style.display = "flex";
   overlay.style.justifyContent = "center";
   overlay.style.alignItems = "center";
   overlay.style.zIndex = "9999";
+  overlay.style.padding = "20px";
 
   const tarjeta = document.createElement("div");
+
+  const esMobile = window.innerWidth < 600;
+
   tarjeta.style.background = "#111";
   tarjeta.style.color = "#fff";
-  tarjeta.style.padding = "60px 100px";
+  tarjeta.style.padding = esMobile ? "30px 20px" : "60px 100px";
   tarjeta.style.borderRadius = "20px";
   tarjeta.style.textAlign = "center";
+  tarjeta.style.width = esMobile ? "100%" : "auto";
+  tarjeta.style.maxWidth = "500px";
 
   tarjeta.innerHTML = `
-    <h1 style="font-size:45px;">EL GANADOR ES</h1>
-    <h2 style="font-size:60px; margin:20px 0; color:#00ffcc;">
+    <h1 style="font-size:${esMobile ? "28px" : "45px"}; margin-bottom:20px;">
+      🎉 EL GANADOR ES 🎉
+    </h1>
+    <h2 style="font-size:${esMobile ? "36px" : "60px"}; margin:20px 0; color:#00ffcc;">
       ${ganador.texto}
     </h2>
-    <button id="cerrarOverlay" style="padding:10px 25px; cursor:pointer;">
+    <button id="cerrarOverlay"
+      style="
+        padding:12px 30px;
+        font-size:18px;
+        border:none;
+        border-radius:10px;
+        cursor:pointer;
+        background:#7182f5;
+        color:white;">
       Cerrar
     </button>
   `;
@@ -347,15 +323,64 @@ function mostrarPantallaGrande(){
     overlay.remove();
   };
 }
- 
 
+
+// =============================
+// 🔘 BOTÓN MOSTRAR GANADOR
+// =============================
 document.getElementById("showWinnerBtn").addEventListener("click", ()=>{
+
   if(ganador){
-    mostrarPantallaGrande();
+    mostrarPantallaGrande(ganador);
+  } else {
+    alert("Todavía no hay ganador seleccionado");
+  }
+
+});
+// INICIO
+async function iniciar(){
+  await cargarDatos();
+  dibujar();
+}
+
+
+// 🔘 BOTÓN COMENZAR SORTEO
+document.getElementById("startBtn").addEventListener("click", ()=>{
+  if(puntos.length === 0){
+    alert("No hay participantes cargados");
+    return;
+  }
+
+  confeti = [];
+  ganador = null;
+  buscarGanador();
+});
+// =============================
+// 🚀 INICIAR APLICACIÓN
+// =============================
+document.addEventListener("DOMContentLoaded", async function() {
+  try {
+    await cargarDatos();
+    dibujar();
+  } catch (error) {
+    console.error("Error iniciando app:", error);
   }
 });
+ ;  
+ 
+ document.getElementById("resetBtn").addEventListener("click", ()=>{
 
+  ganador = null;
+  confeti = [];
+  buscando = false;
+  vueltas = 0;
+  scannerAngle = 0;
+  targetRadius = radiusSmall;
 
+  document.getElementById("ganadorBox").style.display = "none";
+  document.getElementById("showWinnerBtn").style.display = "none";
+
+});
 </script>
 <script src="header.js"></script>
 
