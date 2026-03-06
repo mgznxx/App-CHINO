@@ -137,6 +137,14 @@ async function cargarDatos(){
         let valor = row[h];
         let estilo = "";
 
+  // 🕒 FORMATEAR FECHA
+  if(typeof valor === "string" && valor.includes("T") && valor.includes("Z")){
+    let fecha = new Date(valor);
+    valor = fecha.toLocaleString("es-AR", {
+      timeZone: "America/Argentina/Buenos_Aires"
+    });
+  }
+
         if(index === 3){
           let puntos = parseInt(valor, 10);
 

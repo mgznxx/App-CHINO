@@ -73,7 +73,7 @@
 
      
     <div class="contenedor-btn">
-      <button class="btn-whatsapp" onclick="unirseWhatsapp()">
+      <button class="btn-whatsapp" onclick="abrirWhatsapp()">
         Unirme al WhatsApp
     </button>
     <button
@@ -210,14 +210,23 @@ function limpiarInicio() {
 }
 
 // ===== WHATSAPP =====
-function abrirWhatsapp() {
+async function abrirWhatsapp() {
+
   const telefono = document.getElementById("telefono").value.trim();
 
   if (!telefono) return;
 
-  fetch("https://script.google.com/macros/s/AKfycbwUl31-IGLZR8j8EotlvdjdIKTZDTIaZkdfMRfLf87eO0QU20Reuqc9vizYMV6BIUQq/exec?telefono=" 
-  + telefono + 
-  "&whatsapp=SI&key=CLUB2026SEGURA");
+  try {
+
+    await fetch(
+      "https://script.google.com/macros/s/AKfycbwUl31-IGLZR8j8EotlvdjdIKTZDTIaZkdfMRfLf87eO0QU20Reuqc9vizYMV6BIUQq/exec?modo=whatsapp&telefono="
+      + telefono +
+      "&key=CLUB2026SEGURA"
+    );
+
+  } catch (error) {
+    console.log("Error registrando WhatsApp", error);
+  }
 
   const mensaje = encodeURIComponent(
     "Hola 👋 Gracias por registrarme en el Club de Clientes 🎉"
